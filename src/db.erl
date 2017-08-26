@@ -14,11 +14,24 @@
 start_link(Args) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
 
+get_timestamp() ->
+    {Megasecs, Secs, Microsecs} = erlang:now(),
+    (Megasecs * 1000000) + Secs + (Microsecs / 1000000).
+
+
 init(DataPath) ->
     case file:open(DataPath, [read]) of
         {ok, Fd} ->
+
+            Begin = get_timestamp(),
             {ok, Data} = ecsv:process_csv_file_with(Fd,
-                fun parse/2, maps:new()),
+                fun parse/2, {maps:new(), 0}),
+            End = get_timestamp(),
+
+            Duration = End - Begin,
+
+            io:format("Duration: ~p item/s~n", [Duration]),
+            file:close(Fd),
 
             {ok, #state{data = Data}};
 
@@ -27,18 +40,19 @@ init(DataPath) ->
             init:stop()
     end.
 
-% parse and build up data
 parse({eof}, Acc) ->
     Acc;
-parse({newline, Line}, Acc) ->
+parse({newline, Line}, {Acc, N}) ->
+    io:format("parsing:~p~n", [N]),
+
     [Number, Context, Name] = string_line_to_binary_line(Line),
 
     case util:to_e164(Number) of
         {notok, NonE164} ->
             io:format("db:parse, invalid-number:~p on line:~p~n", [NonE164, Line]),
-            Acc;
-        {ok, N} ->
-            maps:put({N, Context}, Name, Acc)
+            {Acc, N + 1};
+        {ok, Normalized} ->
+            {maps:put({Normalized, Context}, Name, Acc), N + 1}
     end.
 
 string_line_to_binary_line([First, Second, Third]) ->
