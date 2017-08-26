@@ -1,0 +1,2 @@
+{"src/*",  [debug_info, {outdir, "_build/default/lib/truly/ebin"}]}.
+{"test/*", [debug_info, {outdir, "_build/default/lib/truly/ebin"}]}.

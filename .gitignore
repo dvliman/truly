@@ -1,0 +1,7 @@
+rebar.lock
+*.beam
+*.swp
+_build
+erl_crash.dump
+.idea
+*.iml

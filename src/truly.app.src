@@ -1,0 +1,12 @@
+{application, truly,
+    [{description, "trulywireless.com"},
+     {vsn, "0.0.1"},
+     {registered, [sup]},
+     {mod, {truly, []}},
+     {applications, [
+         kernel,
+         stdlib,
+         jiffy,
+         ibrowse,
+         cowboy]}
+]}.
