@@ -7,4 +7,9 @@ start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-    {ok, {{one_for_one, 10, 30}, []}}.
+    DataPath = truly:config(data_path),
+
+    Db = {db, {db, start_link, [DataPath]},
+        transient, 1000, worker, [db]},
+
+    {ok, {{one_for_one, 10, 30}, [Db]}}.

@@ -1,5 +1,5 @@
 {application, truly,
-    [{description, "trulywireless.com"},
+    [{description, "truly caller id service"},
      {vsn, "0.0.1"},
      {registered, [sup]},
      {mod, {truly, []}},
