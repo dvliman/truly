@@ -3,8 +3,6 @@
 
 -record(state, {data = dict:new()}).
 
--export([normalize/1]).
-
 -export([start_link/1,
          init/1,
          handle_call/3,
@@ -20,29 +18,33 @@ init(DataPath) ->
     case file:open(DataPath, [read]) of
         {ok, Fd} ->
             {ok, Data} = ecsv:process_csv_file_with(Fd,
-                fun parse_file/2, maps:new()),
+                fun parse/2, maps:new()),
 
             {ok, #state{data = Data}};
 
         {error, Reason} ->
-            io:format("db:init/1, error reading csv:~p", [Reason]),
+            io:format("db:init, error reading csv:~p~n", [Reason]),
             init:stop()
     end.
 
-parse_file({eof}, Acc) ->
+% parse and build up data
+parse({eof}, Acc) ->
     Acc;
-parse_file({newline, [Number, Context, Name] = Line}, Acc) ->
-    Key   = {normalize(Number), Context},
-    maps:put(Key, Name, Acc).
+parse({newline, Line}, Acc) ->
+    [Number, Context, Name] = string_line_to_binary_line(Line),
 
-% normalize to E.164 format
-% https://en.wikipedia.org/wiki/E.164
-normalize("+" ++ Rest) ->
-    ct:pal("rest:~p", [Rest]),
-    Rest;
-normalize(Number) ->
-    ct:pal("number:~p", [Number]),
-    Number.
+    case util:to_e164(Number) of
+        {notok, NonE164} ->
+            io:format("db:parse, invalid-number:~p on line:~p~n", [NonE164, Line]),
+            Acc;
+        {ok, N} ->
+            maps:put({N, Context}, Name, Acc)
+    end.
+
+string_line_to_binary_line([First, Second, Third]) ->
+    [list_to_binary(First),
+     list_to_binary(Second),
+     list_to_binary(Third)].
 
 handle_call(Msg, From, State) ->
     {noreply, State}.
