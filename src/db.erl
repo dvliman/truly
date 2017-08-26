@@ -3,6 +3,8 @@
 
 -record(state, {data}).
 
+-export([get/1, put/3]).
+
 -export([start_link/1,
          init/1,
          handle_call/3,
@@ -13,6 +15,12 @@
 
 start_link(Args) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
+
+get(Number) ->
+    gen_server:call(?MODULE, {get, Number}).
+
+put(Number, Context, Name) ->
+    gen_server:call(?MODULE, {put, Number, Context, Name}).
 
 init(DataPath) ->
     case file:read_file(DataPath) of
@@ -44,11 +52,34 @@ build_index([Number, Context, Name], Acc) ->
             io:format("db:parse, invalid-number:~p", [BadNumber]),
             Acc;
         {ok, N} ->
-            maps:put({N, Context}, Name, Acc)
+            maps_put(N, {Context, Name}, Acc)
     end.
 
-handle_call(Msg, From, State) ->
-    {noreply, State}.
+maps_put(K, V, Map) ->
+    maps:update_with(K,
+        fun(OldValue) ->
+            sets:add_element(V, OldValue)
+        end, sets_new(V), Map).
+
+sets_new(Element) ->
+    sets:add_element(Element, sets:new()).
+
+handle_call({get, Number}, _, #state{data = Data} = State) ->
+    Reply = case maps:find(Number, Data) of
+                {ok, SetValue} ->
+                    sets:to_list(SetValue);
+                error ->
+                    undefined
+            end,
+
+    {reply, Reply, State};
+
+handle_call({put, Number, Context, Name}, _, #state{data = Data} = State) ->
+    NewData = maps_put(Number, {Context, Name}, Data),
+    {reply, ok, State#state{data = NewData}};
+
+handle_call(reset, _, State) ->
+    {reply, ok, State#state{data = maps:new()}}.
 
 handle_cast(_, State) ->
     {noreply, State}.

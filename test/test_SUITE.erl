@@ -2,7 +2,8 @@
 
 -export([normalize_e164_test/1,
          valid_e164_test/1,
-         csv_parser_test/1]).
+         csv_parser_test/1,
+         phones_multiple_context_test/1]).
 
 normalize_e164_test(_TestConfig) ->
     {ok, <<"+13058224036">>} = util:to_e164(<<"+13058224036">>),
@@ -30,3 +31,19 @@ csv_parser_test(_TestConfig) ->
      {newline,["(609) 491-4267","home","Rubino Lennoxlove"]},
      {eof}]
         = lists:reverse(Lines).
+
+phones_multiple_context_test(_) ->
+    reset_db(),
+
+    Number = <<"+7142532851">>,
+    ok = db:put(Number, <<"facebook">>, <<"david liman">>),
+    ok = db:put(Number, <<"github">>, <<"dvliman">>),
+
+    equals_xs([{<<"facebook">>, <<"david liman">>},
+               {<<"github">>, <<"dvliman">>}], db:get(Number)).
+
+reset_db() ->
+    gen_server:call(whereis(db), reset).
+
+equals_xs(Xs1, Xs2) ->
+    true = lists:sort(Xs1) =:= lists:sort(Xs2).
