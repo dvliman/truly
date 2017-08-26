@@ -1,9 +1,24 @@
 -module(test_SUITE).
 
+-export([all/0]).
+
 -export([normalize_e164_test/1,
          valid_e164_test/1,
          csv_parser_test/1,
          phones_multiple_context_test/1]).
+
+all() ->
+    make:all([load]),
+    
+    ExportedFuns = test_SUITE:module_info(exports),
+
+    TestFuns = lists:filtermap(
+        fun({_, 0}) -> false;
+           ({module_info, 1}) -> false;
+           ({Fun, _}) -> {true, Fun}
+        end, ExportedFuns),
+
+    lists:map(fun(F) -> erlang:apply(?MODULE, F, [[]]) end, TestFuns).
 
 normalize_e164_test(_TestConfig) ->
     {ok, <<"+13058224036">>} = util:to_e164(<<"+13058224036">>),
