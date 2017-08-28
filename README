@@ -1,8 +1,28 @@
+how to run:
+===========
+- install erlang 19+ via source: https://www.erlang.org/downloads
+- install erlang with installer: https://www.erlang-solutions.com/blog/erlang-installer-a-better-way-to-use-erlang-on-osx.html
+- apt-get install erlang erlang-doc
+- brew install erlang@19
+- make all
+
 files:
 ======
-
-design assumptions:
-===================
+EMakefile     - to compile modified file in erlang shell
+Makefile
+rebar.config  - dependencies manifest
+rebar3        - dependencies manager
+config/
+    app.config  - config file
+src/
+    db.erl             - read csv file on startup, store in memory map
+    number_handler.erl - accept (number, context, name) pair
+    query_handler.erl  - query by number
+    truly.erl          - main entry, set endpoints, listen to port
+    sup.erl            - erlang supervisor hierarchy
+    util.erl           - utilities
+test/
+    test_SUITE         - to run test: make shell; test_SUITE:all().
 
 data shape:
 ===========
