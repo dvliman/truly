@@ -5,7 +5,8 @@
 -export([normalize_e164_test/1,
          valid_e164_test/1,
          csv_parser_test/1,
-         phones_multiple_context_test/1]).
+         phones_multiple_context_test/1,
+         number_handler_non_e164_format/1]).
 
 all() ->
     make:all([load]),
@@ -58,8 +59,29 @@ phones_multiple_context_test(_) ->
     equals_xs([{<<"facebook">>, <<"david liman">>},
                {<<"github">>, <<"dvliman">>}], db:get(Number)).
 
+number_handler_non_e164_format(_) ->
+    reset_db(),
+
+    Payload = #{number => '1 (714) 253-2851',
+                context => truly,
+                name => david},
+
+    {ok, "400", _, Body} = ibrowse:send_req(endpoint("number"),
+        header(), post, jiffy:encode(Payload)),
+
+    #{<<"error">>  := <<"badrequest">>,
+      <<"reason">> := <<"number_not_e164_format">>}
+        = jiffy:decode(Body, [return_maps]).
+
+header() ->
+    [{<<"Content-Type">>, <<"application/json">>}].
+
+endpoint(Path) when is_list(Path) ->
+    lists:flatten(io_lib:format("http://localhost:~p/~s",
+        [truly:config(http_port), Path])).
+
 reset_db() ->
-    gen_server:call(whereis(db), reset).
+    gen_server:call(db, reset).
 
 equals_xs(Xs1, Xs2) ->
     true = lists:sort(Xs1) =:= lists:sort(Xs2).
