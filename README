@@ -20,8 +20,8 @@ files:
 ======
 EMakefile     - to compile modified file in erlang shell
 Makefile
-rebar.config  - dependencies manifest
-rebar3        - dependencies manager
+rebar.config  - basically: project.clj
+rebar3        - basically: lein, rvm, npm, etc
 config/
     app.config  - config file
 src/
@@ -33,6 +33,13 @@ src/
     util.erl           - utilities
 test/
     test_SUITE         - to run test: make shell; test_SUITE:all().
+
+assumptions:
+===========
+read file on startup, blocking until it is done
+normalize to E.164 format
+drop bad data
+do validations at the most outer edge (the http handler)
 
 data shape:
 ===========
