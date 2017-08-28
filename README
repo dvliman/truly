@@ -1,3 +1,11 @@
+deployed version:
+=================
+curl -v http://45.55.93.196:8080/query?number=%2B171425328511
+
+curl -v -XPOST http://45.55.93.196:8080/number  \
+    -H "Content-Type: application/json" \
+    -d '{"name": "david liman", "context": "truly", "number": "+17142532851"}'
+
 how to run:
 ===========
 - install erlang:
