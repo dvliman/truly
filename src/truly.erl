@@ -3,7 +3,7 @@
 
 -export([start/2,
          stop/1,
-         config/1]).
+         config/2]).
 
 start(_Type, _Args) ->
     Dispatch = cowboy_router:compile([
@@ -23,5 +23,4 @@ stop(_State) ->
     ok.
 
 config(Key, Default) ->
-    {ok, Value} = application:get_env(truly, Key, Default),
-    Value.
+    application:get_env(truly, Key, Default).
