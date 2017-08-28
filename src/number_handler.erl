@@ -37,4 +37,3 @@ add_caller_id(Req, State) ->
             Req2  = cowboy_req:set_resp_body(jiffy:encode(Reply), Req1),
             {true, Req2, State}
     end.
-

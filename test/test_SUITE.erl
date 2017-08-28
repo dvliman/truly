@@ -6,7 +6,8 @@
          valid_e164_test/1,
          csv_parser_test/1,
          phones_multiple_context_test/1,
-         number_handler_non_e164_format/1]).
+         number_handler_non_e164_format/1,
+         end_to_end/1]).
 
 all() ->
     make:all([load]),
@@ -72,6 +73,21 @@ number_handler_non_e164_format(_) ->
     #{<<"error">>  := <<"badrequest">>,
       <<"reason">> := <<"number_not_e164_format">>}
         = jiffy:decode(Body, [return_maps]).
+
+end_to_end(_) ->
+    reset_db(),
+
+    Payload = #{<<"number">> => <<"+17142532851">>,
+                <<"context">> => <<"truly">>,
+                <<"name">> => <<"david">>},
+
+    ibrowse:send_req(endpoint("number"),
+        header(), post, jiffy:encode(Payload)),
+
+    {ok, "200", _, Res} = ibrowse:send_req(
+        endpoint("query?number=%2B17142532851"), header(), get),
+
+    #{<<"results">> := [Payload]} = jiffy:decode(Res, [return_maps]).
 
 header() ->
     [{<<"Content-Type">>, <<"application/json">>}].
