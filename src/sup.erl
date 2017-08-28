@@ -7,7 +7,7 @@ start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-    DataPath = truly:config(data_path),
+    DataPath = truly:config(data_path, "/root/data/caller-id.csv"),
 
     Db = {db, {db, start_link, [DataPath]},
         transient, 1000, worker, [db]},

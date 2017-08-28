@@ -6,4 +6,4 @@ _build
 .crashdump
 .idea
 *.iml
-log
+*.log

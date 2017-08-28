@@ -12,7 +12,7 @@ start(_Type, _Args) ->
             {"/number", number_handler, []}
         ]}]),
 
-    Port = truly:config(http_port),
+    Port = truly:config(http_port, 8080),
 
     {ok, _} = cowboy:start_clear(http, [{port, Port}],
         #{env => #{dispatch => Dispatch}}),
@@ -22,6 +22,6 @@ start(_Type, _Args) ->
 stop(_State) ->
     ok.
 
-config(Key) ->
-    {ok, Value} = application:get_env(truly, Key),
+config(Key, Default) ->
+    {ok, Value} = application:get_env(truly, Key, Default),
     Value.
