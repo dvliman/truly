@@ -1,0 +1,13 @@
+/_build
+/db
+/deps
+/*.ez
+erl_crash.dump
+npm-debug.log
+/assets/node_modules
+/priv/static/
+/config/*.secret.exs
+mix.lock
+.idea
+*.iml
+.elixir_ls/
